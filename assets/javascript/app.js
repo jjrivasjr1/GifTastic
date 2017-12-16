@@ -1,11 +1,30 @@
 // alert("touch down");
 // Initial array of cars
-var cars = ["Ferrari", "Lamborgini", "Bently", "Rolls Royce"];
+var cars = ["Ferrari Enzo", "Lamborgini Aventador", "Bently GT", "Rolls Royce wraith"];
 //Displays Auto Mobile Gifs
-function alertCarName(){
+
+ $('#cars-view').on("click", "img", function(){
+    console.log("clicked");
+        if ($(this).attr("data-state") == "still"){
+            // var imageNumber = $(this).attr("id");
+            // var gifUrl = $("#gifImage" + imageNumber).val();
+            var animate = $(this).attr("data-animate");
+            $(this).attr("src", animate);
+            $(this).attr("data-state", "animate");
+        } else {
+            var still = $(this).attr("data-still");
+            $(this).attr("src", still);
+            $(this).attr("data-state", "still");
+        }
+    });
+
+
+
+function displayCarGif(){
+  
   var carName = $(this).attr("data-name");
   // URL constructed
-        var queryURL = "https://api.giphy.com/v1/gifs/search?api_key=dc6zaTOxFJmzC&q="+ carName+"&limit=10";
+        var queryURL = "https://api.giphy.com/v1/gifs/search?api_key=dc6zaTOxFJmzC&q="+ carName+"&limit=10&rating=pg";
 
         // Creates AJAX call to run the giphy API
         $.ajax({
@@ -15,27 +34,63 @@ function alertCarName(){
         //store all of the retreved dat inside of a object called "response"
         done(function(response) {
           console.log(response);
+          $("#cars-view").empty();
           for(y=0;y<response.data.length; y++){
 
-          var carDiv = $("<div class='car'>");
+          var carDiv = $("<div>");
 
-          var imgURL = response.data[y].images.original.url;
-          //element to hold the image
-          var image = $("<img>").attr("src", imgURL);
-          //Append the image
-          carDiv.append(image);
+          carDiv.addClass('');
 
-          // var carImage = $("<img>");
-
+          var url = response.data[y].images.fixed_height_still.url;
          
-          // carImage.attr("alt", "Car Image");
+          //element to hold the image
+          var image = $("<img>");
+
+          image.attr("src", url);
+
+          image.attr("id",y);
+          
+          image.attr("data-state", "still");
+
+          image.attr("data-still", url);
+
+          image.attr("data-animate",response.data[y].images.fixed_height.url);
+
+          //rating display
+          var rated =response.data[y].rating;
+
+          var rating = $("<p>").text("Rating: " + rated);
+
+          //still image display
+          var stillImage = $("<input>").attr("type", "hidden");
+
+          stillImage.val(url);
+
+          stillImage.attr("id", "stillImage"+y);
+
+
+          var gifImage = $("<input>").attr("type", "hidden");
+
+          gifImage.val(response.data[y].images.fixed_height.url);
+
+          gifImage.attr("id","gifImage"+y);
+
+          carDiv.append(rating);
+          carDiv.append(image);
+          carDiv.append(gifImage);
+          carDiv.append(stillImage);
 
           $("#cars-view").prepend(carDiv);
           }
+         
         });
 
-  // alert(carName);
+
+
 }
+
+//alert(carName);
+ 
 
 // Function for displaying movie data
       function renderButtons() {
@@ -78,8 +133,7 @@ function alertCarName(){
 
       });
 
-      $(document).on("click", ".car", alertCarName);
+      $(document).on("click", ".car", displayCarGif);
 
       renderButtons();
 
-     
